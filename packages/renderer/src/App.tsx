@@ -8,6 +8,9 @@ import Login from './page/auth/login';
 import { Toaster } from '@/components/ui/sonner';
 import './App.css';
 import { useCookies } from "react-cookie";
+import JsonFormatter from './page/format/json/json';
+import ArrayFormatter from './page/format/array/array';
+import JsonComparator from './page/diff/json-to-json/json-to-json';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -58,10 +61,13 @@ function App() {
           )}
 
           <main className="flex-1">
-            <div className="max-w-6xl px-4 sm:px-6 py-6">
+            <div className="px-4 sm:px-6 py-6">
               <Routes>
                 <Route path="/" element={isAuthenticated ? <Home /> : <Navigate to="/login" />} />
                 <Route path="/login" element={<Login />} />
+                <Route path="/format/json" element={<JsonFormatter />} />
+                <Route path="/format/array" element={<ArrayFormatter />} />
+                <Route path="/compare/json-json" element={<JsonComparator />} />
               </Routes>
             </div>
           </main>

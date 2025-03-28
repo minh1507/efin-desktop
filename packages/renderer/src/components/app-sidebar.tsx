@@ -1,5 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, LogOut } from 'lucide-react';
+import { Home, LogOut, ChevronDown, ChevronRight } from 'lucide-react';
+import { useState } from 'react';
+import { motion } from 'framer-motion';
 import {
   Sidebar,
   SidebarContent,
@@ -11,23 +13,47 @@ import {
   SidebarMenuItem,
   SidebarHeader,
 } from '@/components/ui/sidebar';
-import { useCookies } from "react-cookie";
+import { useCookies } from 'react-cookie';
 
-const items = [
-  { title: 'Trang chủ', url: '/', icon: Home },
+const menuItems = [
+  {
+    title: 'Trang chủ',
+    url: '/',
+    icon: Home,
+    children: [],
+  },
+  {
+    title: 'Định dạng',
+    icon: Home,
+    children: [
+      { title: 'Json', url: '/format/json' },
+    ],
+  },
+  {
+    title: 'So sánh',
+    icon: Home,
+    children: [
+      { title: 'Json với Json', url: '/compare/json-json' },
+    ],
+  },
 ];
 
 interface AppSidebarProps {
-  setIsAuthenticated : (isOpen: boolean) => void;
+  setIsAuthenticated: (isOpen: boolean) => void;
 }
 
 export function AppSidebar({ setIsAuthenticated }: AppSidebarProps) {
   const location = useLocation();
-  const [cookies, setCookie, removeCookie] = useCookies(["token", "username"]);
+  const [cookies, , removeCookie] = useCookies(['token', 'username']);
+  const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
+
+  const toggleMenu = (title: string) => {
+    setOpenMenus((prev) => ({ ...prev, [title]: !prev[title] }));
+  };
 
   const handleLogout = () => {
-    removeCookie("token")
-    removeCookie("username")
+    removeCookie('token');
+    removeCookie('username');
     setIsAuthenticated(false);
   };
 
@@ -51,18 +77,57 @@ export function AppSidebar({ setIsAuthenticated }: AppSidebarProps) {
             <SidebarGroupLabel>Tiện ích</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {items.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                      <Link
-                        to={item.url}
-                        className={location.pathname === item.url ? 'bg-accent text-accent-foreground' : ''}
-                      >
-                        <item.icon />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
+                {menuItems.map((item) => (
+                  <div key={item.title}>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton asChild>
+                        {item.children.length ? (
+                          <button onClick={() => toggleMenu(item.title)} className="flex items-center w-full relative">
+                            <item.icon className="mr-2" />
+                            <span>{item.title}</span>
+                            {openMenus[item.title] ? <ChevronDown className="ml-auto" /> : <ChevronRight className="ml-auto" />}
+                          </button>
+                        ) : (
+                          <Link
+                            to={item.url || '#'}
+                            className={location.pathname === item.url ? 'bg-accent text-accent-foreground' : ''}
+                          >
+                            <item.icon className="mr-2" />
+                            <span>{item.title}</span>
+                          </Link>
+                        )}
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: openMenus[item.title] ? 'auto' : 0, opacity: openMenus[item.title] ? 1 : 0 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: openMenus[item.title] ? 0.3 : 0.5, ease: openMenus[item.title] ? 'easeInOut' : 'easeOut' }}
+                      className="overflow-hidden relative"
+                    >
+                      {openMenus[item.title] && item.children.length > 0 && (
+                        <div className="pl-6 border-l-2 border-gray-300 ml-3 relative">
+                          {item.children.map((child, index) => (
+                            <div key={`${child.title}-${index}`} className="relative pl-4 flex items-center">
+                              {index > 0 && <div className="absolute -top-3 left-0 w-2 h-6 border-l-2 border-gray-300" />}
+                              <div className="absolute left-0 w-2 h-full border-l-2 border-gray-300" />
+                              <div className="absolute top-1/2 left-0 w-4 border-b-2 border-gray-300" />
+                              <SidebarMenuItem>
+                                <SidebarMenuButton asChild>
+                                  <Link
+                                    to={child.url}
+                                    className={location.pathname === child.url ? 'bg-accent text-accent-foreground' : ''}
+                                  >
+                                    <span>{child.title}</span>
+                                  </Link>
+                                </SidebarMenuButton>
+                              </SidebarMenuItem>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </motion.div>
+                  </div>
                 ))}
               </SidebarMenu>
             </SidebarGroupContent>
