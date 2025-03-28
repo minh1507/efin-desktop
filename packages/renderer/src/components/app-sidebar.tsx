@@ -11,23 +11,24 @@ import {
   SidebarMenuItem,
   SidebarHeader,
 } from '@/components/ui/sidebar';
+import { useCookies } from "react-cookie";
 
 const items = [
   { title: 'Trang chủ', url: '/', icon: Home },
 ];
 
 interface AppSidebarProps {
-  setIsLoginPopupOpen: (isOpen: boolean) => void;
+  setIsAuthenticated : (isOpen: boolean) => void;
 }
 
-export function AppSidebar({ setIsLoginPopupOpen }: AppSidebarProps) {
+export function AppSidebar({ setIsAuthenticated }: AppSidebarProps) {
   const location = useLocation();
-  const user = localStorage.getItem('user') || 'Unknown';
+  const [cookies, setCookie, removeCookie] = useCookies(["token", "username"]);
 
   const handleLogout = () => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('user');
-    setIsLoginPopupOpen(true);
+    removeCookie("token")
+    removeCookie("username")
+    setIsAuthenticated(false);
   };
 
   return (
@@ -35,16 +36,15 @@ export function AppSidebar({ setIsLoginPopupOpen }: AppSidebarProps) {
       <SidebarHeader className="px-4 py-4 border-b border-gray-200">
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 rounded-full bg-accent text-white flex items-center justify-center text-lg font-bold">
-            {user.charAt(0).toUpperCase()}
+            {cookies.username.charAt(0).toUpperCase()}
           </div>
           <div>
-            <h4 className="text-sm font-medium">{user}</h4>
+            <h4 className="text-sm font-medium">{cookies.username}</h4>
             <p className="text-xs text-gray-500">Tài khoản của bạn</p>
           </div>
         </div>
       </SidebarHeader>
 
-      {/* Nội dung sidebar */}
       <SidebarContent className="flex flex-col justify-between h-full">
         <div>
           <SidebarGroup>
@@ -69,7 +69,6 @@ export function AppSidebar({ setIsLoginPopupOpen }: AppSidebarProps) {
           </SidebarGroup>
         </div>
 
-        {/* Nút đăng xuất */}
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
