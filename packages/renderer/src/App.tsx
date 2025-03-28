@@ -45,8 +45,12 @@ function App() {
 
       // if (response.ok) {
       localStorage.setItem('authToken', 'data.token');
-      localStorage.setItem('user', 'minh');
+      localStorage.setItem('user', 'duongdoican@gmail.com');
       setIsLoginPopupOpen(false);
+      setLoginData({
+        email: '',
+        password: '',
+      })
       // } else {
       //   setError(data.message || 'Đăng nhập thất bại');
       // }
@@ -61,7 +65,7 @@ function App() {
     <Router>
       <SidebarProvider>
         <AppSidebar setIsLoginPopupOpen={setIsLoginPopupOpen} />
-        <div className="flex flex-col min-h-screen">
+        <div className="flex flex-col min-h-screen w-full">
           <Popup isOpen={isLoginPopupOpen} onClose={() => {
           }}>
             <div className="p-6 space-y-4">
@@ -114,7 +118,7 @@ function App() {
 
 
           <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <div className="max-w-6xl mx-auto px-4 sm:px-6">
+            <div className="max-w-6xl px-4 sm:px-6">
               <div className="flex h-14 items-center justify-between">
                 <div className="flex items-center gap-4">
                   <SidebarTrigger>
@@ -142,7 +146,7 @@ function App() {
           </header>
 
           <main className="flex-1">
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
+            <div className="max-w-6xl px-4 sm:px-6 py-6">
               <Routes>
                 <Route path="/" element={<Home />} />
               </Routes>
