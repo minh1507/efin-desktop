@@ -26,11 +26,14 @@ const Login = () => {
       if (response.status.success) {
         setCookie("token", response.data.accessToken, { path: '/' });
         setCookie("username", response.data.username)
+
+        console.log(cookie.username)
         navigate('/');
         setIsLoading(false);
       }
     } catch (error) {
       setIsLoading(false)
+      console.log(error)
     }
   };
 

@@ -1,14 +1,9 @@
 {
   "name": "root",
-  "description": "Secure boilerplate for Electron app based on Vite",
+  "description": "Efin",
   "version": "3.1.0",
   "private": true,
   "type": "module",
-  "author": {
-    "email": "kozackunisoft@gmail.com",
-    "name": "Alex Kozack",
-    "url": "https://kozack.me"
-  },
   "main": "packages/entry-point.mjs",
   "workspaces": [
     "packages/*"
@@ -33,6 +28,7 @@
     "electron": "35.0.1",
     "electron-builder": "26.0.11",
     "glob": "11.0.1",
+    "mlly": "^1.7.4",
     "playwright": "^1.51.0"
   },
   "dependencies": {

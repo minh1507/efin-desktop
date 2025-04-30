@@ -49,7 +49,7 @@ export default function JsonFormatter() {
       /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(?=\s*:))|("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*")|\b(true|false|null)\b|(-?\b\d+(?:\.\d+)?(?:[eE][+-]?\d+)?\b)|([{}[\],:])/g,
       (match, key, _, string, __, booleanNull, number, symbol) => {
         if (key) return `<span class='text-lime-300'>${match}</span>`;
-        if (string) return `<span class='text-blue-300'>${match}</span>`;
+        if (string) {return `<span class='text-blue-300'>${match}</span>`};
         if (booleanNull) return `<span class='text-purple-300'>${match}</span>`;
         if (number) return `<span class='text-orange-300'>${match}</span>`;
         if (symbol) return `<span class='text-red-300'>${match}</span>`;

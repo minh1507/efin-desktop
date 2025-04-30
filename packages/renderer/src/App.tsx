@@ -1,28 +1,24 @@
-import { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { useEffect, useState, Suspense, lazy } from 'react';
+import { HashRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { SidebarProvider, SidebarTrigger } from './components/ui/sidebar';
 import { AppSidebar } from './components/app-sidebar';
 import { Button } from './components/ui/button';
-import Home from './page/home/home';
-import Login from './page/auth/login';
 import { Toaster } from '@/components/ui/sonner';
 import './App.css';
 import { useCookies } from "react-cookie";
-import JsonFormatter from './page/format/json/json';
-import ArrayFormatter from './page/format/array/array';
-import JsonComparator from './page/diff/json-to-json/json-to-json';
+
+// Lazy-loaded components
+const Home = lazy(() => import('./page/home/home'));
+const Login = lazy(() => import('./page/auth/login'));
+const JsonFormatter = lazy(() => import('./page/format/json/json'));
+const JsonComparator = lazy(() => import('./page/diff/json-to-json/json-to-json'));
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [cookies] = useCookies(["token"]);
 
   useEffect(() => {
-    if (!cookies.token) {
-      setIsAuthenticated(false)
-    } else {
-      setIsAuthenticated(true)
-    }
-
+    setIsAuthenticated(!!cookies.token);
   }, [cookies.token]);
 
   return (
@@ -62,17 +58,18 @@ function App() {
 
           <main className="flex-1">
             <div className="px-4 sm:px-6 py-6">
-              <Routes>
-                <Route path="/" element={isAuthenticated ? <Home /> : <Navigate to="/login" />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/format/json" element={<JsonFormatter />} />
-                <Route path="/format/array" element={<ArrayFormatter />} />
-                <Route path="/compare/json-json" element={<JsonComparator />} />
-              </Routes>
+              <Suspense fallback={<div>Loading...</div>}>
+                <Routes>
+                  <Route path="/" element={isAuthenticated ? <Home /> : <Navigate to="/login" />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/format/json" element={<JsonFormatter />} />
+                  <Route path="/compare/json-json" element={<JsonComparator />} />
+                </Routes>
+              </Suspense>
             </div>
           </main>
 
-          <Toaster/>
+          <Toaster />
         </div>
       </SidebarProvider>
     </Router>
