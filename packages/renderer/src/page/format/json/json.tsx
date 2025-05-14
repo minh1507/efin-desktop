@@ -1,7 +1,11 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
+import { SearchDialog } from "@/components/search-dialog";
+import { useSearch } from "@/lib/context/search-context";
+import { Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function JsonFormatter() {
   const [input, setInput] = useState("");
@@ -9,7 +13,25 @@ export default function JsonFormatter() {
   const [error, setError] = useState<null | string>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const preRef = useRef<HTMLPreElement>(null);
+  
+  const { isSearchOpen, openSearch, closeSearch } = useSearch();
 
+  // Hàm định dạng JSON với syntax highlighting
+  const syntaxHighlight = useCallback((json: string) => {
+    return json.replace(
+      /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(?=\s*:))|("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*")|\b(true|false|null)\b|(-?\b\d+(?:\.\d+)?(?:[eE][+-]?\d+)?\b)|([{}[\],:])/g,
+      (match, key, _, string, __, booleanNull, number, symbol) => {
+        if (key) return `<span class='text-lime-300'>${match}</span>`;
+        if (string) return `<span class='text-blue-300'>${match}</span>`;
+        if (booleanNull) return `<span class='text-purple-300'>${match}</span>`;
+        if (number) return `<span class='text-orange-300'>${match}</span>`;
+        if (symbol) return `<span class='text-red-300'>${match}</span>`;
+        return match;
+      }
+    );
+  }, []);
+
+  // Cập nhật kích thước textarea khi input thay đổi
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
@@ -17,6 +39,7 @@ export default function JsonFormatter() {
     }
   }, [input]);
 
+  // Cập nhật kích thước pre element khi formatted json thay đổi
   useEffect(() => {
     if (preRef.current) {
       preRef.current.style.height = "auto";
@@ -24,8 +47,15 @@ export default function JsonFormatter() {
     }
   }, [formattedJson]);
 
-  const formatJson = () => {
+  // Định dạng JSON
+  const formatJson = useCallback(() => {
     try {
+      if (!input.trim()) {
+        setFormattedJson("");
+        setError(null);
+        return;
+      }
+      
       const parsed = JSON.parse(input);
       setFormattedJson(syntaxHighlight(JSON.stringify(parsed, null, 2)));
       setError(null);
@@ -33,73 +63,78 @@ export default function JsonFormatter() {
       setError("Sai định dạng");
       setFormattedJson("");
     }
-  };
+  }, [input, syntaxHighlight]);
 
+  // Format JSON khi input thay đổi
   useEffect(() => {
-    if (input.trim() === "") {
-      setFormattedJson("");
-      setError(null);
-      return;
-    }
-    formatJson();
-  }, [input]);
+    // Sử dụng debounce ở đây nếu cần
+    const timeoutId = setTimeout(() => {
+      formatJson();
+    }, 300);
+    
+    return () => clearTimeout(timeoutId);
+  }, [formatJson]);
 
-  const syntaxHighlight = (json: string) => {
-    return json.replace(
-      /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(?=\s*:))|("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*")|\b(true|false|null)\b|(-?\b\d+(?:\.\d+)?(?:[eE][+-]?\d+)?\b)|([{}[\],:])/g,
-      (match, key, _, string, __, booleanNull, number, symbol) => {
-        if (key) return `<span class='text-lime-300'>${match}</span>`;
-        if (string) {return `<span class='text-blue-300'>${match}</span>`};
-        if (booleanNull) return `<span class='text-purple-300'>${match}</span>`;
-        if (number) return `<span class='text-orange-300'>${match}</span>`;
-        if (symbol) return `<span class='text-red-300'>${match}</span>`;
-        return match;
-      }
-    );
-  };
-
+  // Copy formatted JSON to clipboard
   const handleCopy = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (error || !input.trim()) return;
-    navigator.clipboard.writeText(JSON.stringify(JSON.parse(input), null, 2));
-    toast.success("Đã sao chép JSON!");
+    if (formattedJson) {
+      // Tạo phiên bản plain text không có thẻ HTML
+      const plainText = JSON.parse(input);
+      navigator.clipboard.writeText(JSON.stringify(plainText, null, 2));
+      toast.success('Đã sao chép vào clipboard');
+    }
   };
 
   return (
-    <div className="flex gap-6 p-6 bg-neutral-900 min-h-screen items-start justify-center text-gray-200 w-full">
-      <div className="flex w-full max-w-full gap-6 px-6">
-        <Card className="w-1/2 shadow-lg border border-neutral-700 bg-neutral-800 flex flex-col">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold text-gray-100">Đầu vào</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col flex-grow">
-            <Textarea
-              ref={textareaRef}
-              placeholder="Nhập Json..."
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              className="p-3 border rounded-md bg-neutral-700 text-gray-200 focus:ring focus:ring-gray-500 resize-none overflow-hidden"
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>JSON gốc</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Textarea
+            ref={textareaRef}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Nhập JSON cần định dạng..."
+            className="min-h-[300px] font-mono resize-none"
+          />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>JSON đã định dạng</CardTitle>
+          <Button 
+            variant="outline" 
+            size="icon"
+            title="Tìm kiếm (Ctrl+K)"
+            onClick={openSearch}
+          >
+            <Search className="h-4 w-4" />
+          </Button>
+        </CardHeader>
+        <CardContent>
+          {error ? (
+            <div className="text-red-500">{error}</div>
+          ) : (
+            <pre
+              ref={preRef}
+              className="bg-muted p-4 rounded-md font-mono overflow-auto min-h-[300px]"
+              dangerouslySetInnerHTML={{ __html: formattedJson }}
+              onContextMenu={handleCopy}
             />
-          </CardContent>
-        </Card>
-        <Card className="w-1/2 shadow-lg border border-neutral-700 bg-neutral-800 flex flex-col">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold text-gray-100">Đầu ra</CardTitle>
-          </CardHeader>
-          <CardContent className="flex-grow">
-            {error ? (
-              <p className="text-red-400 font-medium">{error}</p>
-            ) : (
-              <pre
-                ref={preRef}
-                className="whitespace-pre-wrap break-words text-sm bg-neutral-700 p-3 rounded-md border border-neutral-600 text-gray-300 overflow-hidden resize-none cursor-pointer"
-                dangerouslySetInnerHTML={{ __html: formattedJson }}
-                onContextMenu={handleCopy}
-              />
-            )}
-          </CardContent>
-        </Card>
-      </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <SearchDialog 
+        open={isSearchOpen} 
+        onOpenChange={closeSearch} 
+        targetRef={preRef as React.RefObject<HTMLElement>}
+        placeholder="Tìm trong JSON đã định dạng..."
+      />
     </div>
   );
 }

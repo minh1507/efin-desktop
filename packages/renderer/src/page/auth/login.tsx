@@ -1,92 +1,209 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useCookies } from "react-cookie";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
+import { Loader2, LockKeyhole, User, AlertTriangle } from "lucide-react";
 import { motion } from "framer-motion";
-import AuthService from '@/services/auth';
-import { IResponse } from '@/services/type/base';
-import { ILogin } from './login.type';
+import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
+import { loginUser, mockLogin } from '@/lib/store/slices/authSlice';
+import { THEME } from '@/lib/theme';
+import { APP_NAME } from '@/lib/constants';
+
+// Định nghĩa keyframes và style cho component
+const loginStyles = `
+  @keyframes gradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(52, 97, 255, 0.4); }
+    50% { box-shadow: 0 0 0 10px rgba(52, 97, 255, 0); }
+  }
+  
+  .glass-card {
+    backdrop-filter: blur(10px);
+    background-color: rgba(26, 34, 52, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .login-button {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(52, 97, 255, 0.35);
+    background: linear-gradient(to right, #3461FF, #2950E3);
+    color: white;
+    font-weight: 500;
+    border: none;
+  }
+  
+  .login-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(52, 97, 255, 0.5);
+    background: linear-gradient(to right, #2950E3, #1E37A6);
+  }
+  
+  .login-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(52, 97, 255, 0.3);
+  }
+  
+  .login-button::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.2),
+      transparent
+    );
+    transition: 0.8s;
+  }
+  
+  .login-button:hover::after {
+    left: 100%;
+  }
+`;
 
 const Login = () => {
-  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const { status, error } = useAppSelector(state => state.auth);
   const [loginData, setLoginData] = useState({ email: '', password: '' });
-  const [isLoading, setIsLoading] = useState(false);
-  const [cookie, setCookie] = useCookies(["token", "username"]);
+  
+  // Nếu đã đăng nhập, chuyển hướng về trang chủ - có thể bỏ vì đã có PublicRoute
+  // useEffect(() => {
+  //   if (user) {
+  //     navigate('/');
+  //   }
+  // }, [user, navigate]);
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    
+    // Gọi action login
+    await dispatch(loginUser({ 
+      email: loginData.email, 
+      password: loginData.password 
+    }));
+  };
 
-    try {
-      const response: IResponse<ILogin> = await AuthService.login(loginData.email, loginData.password)
-      if (response.status.success) {
-        setCookie("token", response.data.accessToken, { path: '/' });
-        setCookie("username", response.data.username)
-
-        console.log(cookie.username)
-        navigate('/');
-        setIsLoading(false);
-      }
-    } catch (error) {
-      setIsLoading(false)
-      console.log(error)
-    }
+  // Thêm hàm mock login để test
+  const handleMockLogin = () => {
+    dispatch(mockLogin());
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-[#09203F] via-[#537895] to-[#09203F]">
+    <div 
+      className="fixed inset-0 flex items-center justify-center"
+      style={{ 
+        background: THEME.gradient.loginBackground,
+        backgroundSize: '400% 400%',
+        animation: 'gradient 15s ease infinite'
+      }}
+    >
+      <style dangerouslySetInnerHTML={{ __html: loginStyles }} />
+
+      <div className="absolute inset-0 opacity-20">
+        <div className="absolute w-64 h-64 rounded-full bg-primary-500 top-1/4 -left-12 blur-3xl"></div>
+        <div className="absolute w-96 h-96 rounded-full bg-secondary-500 bottom-1/4 -right-20 blur-3xl"></div>
+      </div>
 
       <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        className="w-full max-w-md"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, ease: "easeOut" }}
+        className="w-full max-w-md z-10"
       >
-        <Card className="rounded-sm shadow-xl border border-gray-700 bg-[#2E2E2E] p-6">
-          <CardHeader className="text-center">
-            <CardTitle className="text-3xl font-bold text-white">Đăng nhập</CardTitle>
+        <Card className="glass-card overflow-hidden rounded-xl shadow-2xl">
+          <div className="h-2 bg-gradient-to-r from-primary-500 to-secondary-400"></div>
+          <CardHeader className="space-y-4 text-center pt-8 pb-4">
+            <div className="mx-auto bg-primary-500/10 w-16 h-16 flex items-center justify-center rounded-full mb-2">
+              <LockKeyhole className="h-8 w-8 text-primary-400" />
+            </div>
+            <CardTitle className="text-2xl font-semibold text-white">
+              Đăng nhập {APP_NAME}
+            </CardTitle>
+            <p className="text-sm text-gray-400">
+              Đăng nhập để truy cập vào hệ thống
+            </p>
           </CardHeader>
-          <CardContent>
+          
+          <CardContent className="px-8 pb-8">
+            {error && (
+              <motion.div 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6 p-3 bg-red-500/10 border border-red-500/20 rounded-lg flex items-start gap-2"
+              >
+                <AlertTriangle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
+                <div className="text-sm text-red-200">
+                  {error}
+                </div>
+              </motion.div>
+            )}
+            
             <form onSubmit={handleLoginSubmit} className="space-y-6">
-              <div>
-                <Label htmlFor="email" className="text-gray-300">Tài khoản</Label>
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-gray-300 flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  <span>Tài khoản</span>
+                </Label>
                 <Input
                   id="email"
                   type="email"
                   required
                   placeholder="Nhập tài khoản"
-                  className="mt-2 w-full bg-[#3A3A3A] border border-gray-600 text-gray-200 placeholder-gray-500 focus:ring-2 focus:ring-yellow-500 rounded-lg px-4 py-2"
+                  className="h-11 bg-gray-900/50 border-gray-700 text-white placeholder-gray-500 focus-visible:ring-primary-400 focus-visible:border-primary-400 rounded-lg"
                   value={loginData.email}
                   onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
-                  disabled={isLoading}
+                  disabled={status === 'loading'}
                 />
               </div>
 
-              <div>
-                <Label htmlFor="password" className="text-gray-300">Mật khẩu</Label>
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-gray-300 flex items-center gap-2">
+                  <LockKeyhole className="h-4 w-4" />
+                  <span>Mật khẩu</span>
+                </Label>
                 <Input
                   id="password"
                   type="password"
                   required
                   placeholder="••••••••"
-                  className="mt-2 w-full bg-[#3A3A3A] border border-gray-600 text-gray-200 placeholder-gray-500 focus:ring-2 focus:ring-yellow-500 rounded-lg px-4 py-2"
+                  className="h-11 bg-gray-900/50 border-gray-700 text-white placeholder-gray-500 focus-visible:ring-primary-400 focus-visible:border-primary-400 rounded-lg"
                   value={loginData.password}
                   onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-                  disabled={isLoading}
+                  disabled={status === 'loading'}
                 />
               </div>
 
-              <Button
+              <button
                 type="submit"
-                className="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-semibold transition-all duration-300 ease-in-out px-4 py-2 rounded-lg flex items-center justify-center"
-                disabled={isLoading}
+                className="login-button w-full h-12 rounded-lg flex items-center justify-center mt-8"
+                disabled={status === 'loading'}
               >
-                {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Xác thực'}
-              </Button>
+                {status === 'loading' ? (
+                  <Loader2 className="h-5 w-5 animate-spin mr-2" /> 
+                ) : (
+                  <LockKeyhole className="h-5 w-5 mr-2" />
+                )}
+                <span>{status === 'loading' ? 'Đang xác thực...' : 'Đăng nhập'}</span>
+              </button>
+              
+              {/* Thêm nút đăng nhập giả */}
+              <button
+                type="button"
+                onClick={handleMockLogin}
+                className="w-full h-10 rounded-lg bg-secondary/50 hover:bg-secondary/70 text-white font-medium flex items-center justify-center mt-4"
+              >
+                <span>Đăng nhập giả lập</span>
+              </button>
             </form>
           </CardContent>
         </Card>

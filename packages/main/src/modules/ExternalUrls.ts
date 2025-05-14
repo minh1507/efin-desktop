@@ -1,35 +1,47 @@
-import {AppModule} from '../AppModule.js';
-import {ModuleContext} from '../ModuleContext.js';
-import {shell} from 'electron';
-import {URL} from 'node:url';
+import { AbstractSecurityModule } from './AbstractSecurityModule.js';
+import { shell } from 'electron';
+import { URL } from 'node:url';
 
-export class ExternalUrls implements AppModule {
+/**
+ * Module for handling external URL requests securely.
+ * Opens allowed external URLs in the default browser and blocks disallowed ones.
+ */
+export class ExternalUrls extends AbstractSecurityModule {
+  readonly #allowedExternalOrigins: Set<string>;
 
-  readonly #externalUrls: Set<string>;
-
-  constructor(externalUrls: Set<string>) {
-    this.#externalUrls = externalUrls;
+  /**
+   * Creates a new instance of ExternalUrls
+   * @param allowedExternalOrigins Set of external origin URLs that are permitted to be opened
+   */
+  constructor(allowedExternalOrigins: Set<string>) {
+    super();
+    this.#allowedExternalOrigins = allowedExternalOrigins;
   }
 
-  enable({app}: ModuleContext): Promise<void> | void {
-    app.on('web-contents-created', (_, contents) => {
-      contents.setWindowOpenHandler(({url}) => {
-        const {origin} = new URL(url);
+  applyRule(contents: Electron.WebContents): void {
+    contents.setWindowOpenHandler(({ url }) => {
+      const { origin } = new URL(url);
 
-        if (this.#externalUrls.has(origin)) {
-          shell.openExternal(url).catch(console.error);
-        } else if (import.meta.env.DEV) {
-          console.warn(`Blocked the opening of a disallowed external origin: ${origin}`);
-        }
+      if (this.#allowedExternalOrigins.has(origin)) {
+        // Open allowed external URLs in the system's default browser
+        shell.openExternal(url).catch(err => {
+          console.error(`Failed to open external URL: ${url}`, err);
+        });
+      } else if (import.meta.env.DEV) {
+        console.warn(`Blocked opening disallowed external origin: ${origin}`);
+      }
 
-        // Prevent creating a new window.
-        return {action: 'deny'};
-      });
+      // Always deny creating a new window in the application
+      return { action: 'deny' };
     });
   }
 }
 
-
+/**
+ * Creates a new instance of ExternalUrls with the specified allowed external origins
+ * @param args Constructor parameters for ExternalUrls
+ * @returns A new ExternalUrls instance
+ */
 export function allowExternalUrls(...args: ConstructorParameters<typeof ExternalUrls>) {
   return new ExternalUrls(...args);
 }

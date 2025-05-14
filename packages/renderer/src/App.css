@@ -60,3 +60,16 @@
 ::-webkit-scrollbar-thumb:active {
   background: linear-gradient(45deg, #8b5cf6, #d946ef);
 }
+
+/* App CSS */
+
+.app-header {
+  height: 60px; /* Chiều cao cố định để đảm bảo SearchDialog được đặt đúng vị trí */
+  border-bottom: 1px solid var(--border);
+  background-color: var(--background);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* Các style khác nếu cần */
