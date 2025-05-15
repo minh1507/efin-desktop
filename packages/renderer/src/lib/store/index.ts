@@ -9,18 +9,20 @@ import {
   PURGE,
   REGISTER
 } from 'redux-persist';
-import storage from 'redux-persist/lib/storage';
+import localForageStorage from './sqlite-storage';
 import authReducer from './slices/authSlice';
+import statsReducer from './slices/statsSlice';
 
 // Cấu hình Redux Persist
 const persistConfig = {
   key: 'root',
-  storage,
-  whitelist: ['auth'] // Chỉ lưu auth state vào localStorage
+  storage: localForageStorage,
+  whitelist: ['auth'] // Chỉ lưu auth state vào IndexedDB thông qua localForage
 };
 
 const rootReducer = combineReducers({
   auth: authReducer,
+  stats: statsReducer,
   // thêm các reducers khác ở đây
 });
 

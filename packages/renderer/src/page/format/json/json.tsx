@@ -6,8 +6,14 @@ import { SearchDialog } from "@/components/search-dialog";
 import { useSearch } from "@/lib/context/search-context";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useFeatureTracking } from "@/hooks/useFeatureTracking";
+import { useLanguage } from "@/components/language-provider";
 
 export default function JsonFormatter() {
+  // Track usage of the JSON formatter
+  useFeatureTracking('json_formatter');
+  const { t } = useLanguage();
+
   const [input, setInput] = useState("");
   const [formattedJson, setFormattedJson] = useState("");
   const [error, setError] = useState<null | string>(null);
@@ -60,10 +66,10 @@ export default function JsonFormatter() {
       setFormattedJson(syntaxHighlight(JSON.stringify(parsed, null, 2)));
       setError(null);
     } catch (err) {
-      setError("Sai định dạng");
+      setError(t('json.invalid_format'));
       setFormattedJson("");
     }
-  }, [input, syntaxHighlight]);
+  }, [input, syntaxHighlight, t]);
 
   // Format JSON khi input thay đổi
   useEffect(() => {
@@ -82,7 +88,7 @@ export default function JsonFormatter() {
       // Tạo phiên bản plain text không có thẻ HTML
       const plainText = JSON.parse(input);
       navigator.clipboard.writeText(JSON.stringify(plainText, null, 2));
-      toast.success('Đã sao chép vào clipboard');
+      toast.success(t('json.copied_to_clipboard'));
     }
   };
 
@@ -90,14 +96,14 @@ export default function JsonFormatter() {
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <Card>
         <CardHeader>
-          <CardTitle>JSON gốc</CardTitle>
+          <CardTitle>{t('json.original_json')}</CardTitle>
         </CardHeader>
         <CardContent>
           <Textarea
             ref={textareaRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Nhập JSON cần định dạng..."
+            placeholder={t('json.enter_json_to_format')}
             className="min-h-[300px] font-mono resize-none"
           />
         </CardContent>
@@ -105,11 +111,11 @@ export default function JsonFormatter() {
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>JSON đã định dạng</CardTitle>
+          <CardTitle>{t('json.formatted_json')}</CardTitle>
           <Button 
             variant="outline" 
             size="icon"
-            title="Tìm kiếm (Ctrl+K)"
+            title={t('app.search') + " (Ctrl+K)"}
             onClick={openSearch}
           >
             <Search className="h-4 w-4" />
@@ -133,7 +139,7 @@ export default function JsonFormatter() {
         open={isSearchOpen} 
         onOpenChange={closeSearch} 
         targetRef={preRef as React.RefObject<HTMLElement>}
-        placeholder="Tìm trong JSON đã định dạng..."
+        placeholder={t('json.search_in_formatted_json')}
       />
     </div>
   );

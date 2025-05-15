@@ -1,0 +1,93 @@
+/* Font size adjustment for the entire application */
+html {
+  font-size: 14px; /* Giảm kích thước chữ mặc định */
+}
+
+/* Điều chỉnh kích thước cho các phần tử cụ thể nếu cần */
+.text-base {
+  font-size: 0.9rem !important;
+}
+
+.text-sm {
+  font-size: 0.8rem !important;
+}
+
+.text-lg {
+  font-size: 1rem !important;
+}
+
+.text-xl {
+  font-size: 1.1rem !important;
+}
+
+.text-2xl {
+  font-size: 1.2rem !important;
+}
+
+/* Điều chỉnh kích thước của các tiêu đề */
+h1, .h1 {
+  font-size: 1.5rem !important;
+}
+
+h2, .h2 {
+  font-size: 1.3rem !important;
+}
+
+h3, .h3 {
+  font-size: 1.2rem !important;
+}
+
+h4, .h4 {
+  font-size: 1.1rem !important;
+}
+
+/* Đảm bảo các nút và input cũng được điều chỉnh kích thước phù hợp */
+button, input, select, textarea {
+  font-size: 0.9rem;
+}
+
+/* Các lớp hỗ trợ dành riêng cho ứng dụng */
+.app-text-small {
+  font-size: 0.8rem !important;
+}
+
+/* Đảm bảo các văn bản dài và json tự động xuống dòng */
+pre, code, .json, [class*="json"], [role="json"] {
+  white-space: pre-wrap !important;
+  word-wrap: break-word !important;
+  word-break: break-word !important;
+  overflow-wrap: break-word !important;
+  max-width: 100% !important;
+}
+
+/* Áp dụng cho tất cả các vùng hiển thị có thể chứa JSON */
+.code-block, 
+.data-display, 
+.response-container,
+.panel-content,
+.card-content,
+.data-view,
+[class*="CodeMirror"],
+[class*="editor"],
+[class*="content"] {
+  white-space: pre-wrap !important;
+  word-wrap: break-word !important;
+  word-break: break-word !important;
+  overflow-wrap: break-word !important;
+  max-width: 100% !important;
+}
+
+/* Mặc định cho tất cả các phần tử có thể chứa text dài */
+div, p, span, td, th {
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
+/* Áp dụng cho các box có thể scroll */
+.overflow-auto,
+.overflow-x-auto,
+[class*="scroll"] {
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+} 

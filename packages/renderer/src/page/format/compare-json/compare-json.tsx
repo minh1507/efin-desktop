@@ -6,8 +6,14 @@ import { SearchDialog } from "@/components/search-dialog";
 import { useSearch } from "@/lib/context/search-context";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useFeatureTracking } from "@/hooks/useFeatureTracking";
+import { useLanguage } from "@/components/language-provider";
 
 export default function JsonCompare() {
+  // Track usage of the JSON compare feature
+  useFeatureTracking('json_compare');
+  const { t } = useLanguage();
+
   const [leftInput, setLeftInput] = useState("");
   const [rightInput, setRightInput] = useState("");
   const [comparisonResult, setComparisonResult] = useState<string>("");
@@ -59,6 +65,39 @@ export default function JsonCompare() {
       document.removeEventListener('click', toggleSections);
     };
   }, []);
+
+  // Add event listener for copy key buttons
+  useEffect(() => {
+    const handleCopyKeyClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      // Find the closest .copy-key-btn element (could be the SVG or path inside it)
+      const copyBtn = target.closest('.copy-key-btn');
+      
+      if (copyBtn) {
+        const key = copyBtn.getAttribute('data-key') || '';
+        const direction = copyBtn.getAttribute('data-direction') || '';
+        
+        if (key) {
+          // Direction determines if we're copying from left to right or right to left
+          const isLeftToRight = direction === 'left-to-right';
+          
+          console.log('Copy button clicked:', { 
+            key,
+            direction,
+            isLeftToRight,
+            elementClasses: copyBtn.classList.toString()
+          });
+          
+          copyKeyValue(key, isLeftToRight);
+        }
+      }
+    };
+    
+    document.addEventListener('click', handleCopyKeyClick);
+    return () => {
+      document.removeEventListener('click', handleCopyKeyClick);
+    };
+  }, [leftInput, rightInput]); // Depend on inputs to ensure we're using the latest JSON data
 
   // Hàm đệ quy để thu thập các key bị thiếu
   const collectMissingKeys = (left: any, right: any, path: string = "", missingInLeft: string[] = [], missingInRight: string[] = []) => {
@@ -121,7 +160,7 @@ export default function JsonCompare() {
         leftObj = JSON.parse(leftInput);
         setLeftError(null);
       } catch (err: unknown) {
-        setLeftError("Sai định dạng JSON bên trái");
+        setLeftError(t('json_compare.invalid_left_json'));
         return;
       }
       
@@ -129,7 +168,7 @@ export default function JsonCompare() {
         rightObj = JSON.parse(rightInput);
         setRightError(null);
       } catch (err: unknown) {
-        setRightError("Sai định dạng JSON bên phải");
+        setRightError(t('json_compare.invalid_right_json'));
         return;
       }
 
@@ -141,6 +180,14 @@ export default function JsonCompare() {
       const missingInLeft: string[] = [];
       const missingInRight: string[] = [];
       collectMissingKeys(leftObj, rightObj, "", missingInLeft, missingInRight);
+      
+      console.log('Missing keys analysis:', {
+        missingInLeft,
+        missingInRight,
+        leftObj,
+        rightObj
+      });
+      
       setMissingInLeftKeys(missingInLeft);
       setMissingInRightKeys(missingInRight);
 
@@ -148,13 +195,13 @@ export default function JsonCompare() {
       const resultHtml = compareObjects(leftObj, rightObj, "", getNextSectionId);
       setComparisonResult(resultHtml);
     } catch (err: unknown) {
-      console.error("Lỗi khi so sánh:", err);
-      const errorMessage = err instanceof Error ? err.message : 'Lỗi không xác định';
-      setComparisonResult(`<span class="text-red-500">Lỗi khi so sánh: ${errorMessage}</span>`);
+      console.error(t('json_compare.comparison_error'), err);
+      const errorMessage = err instanceof Error ? err.message : t('json_compare.unknown_error');
+      setComparisonResult(`<span class="text-red-500">${t('json_compare.error_during_comparison')}: ${errorMessage}</span>`);
       setMissingInLeftKeys([]);
       setMissingInRightKeys([]);
     }
-  }, [leftInput, rightInput]);
+  }, [leftInput, rightInput, t]);
 
   // Thực hiện so sánh khi input thay đổi (với debounce)
   useEffect(() => {
@@ -312,10 +359,11 @@ export default function JsonCompare() {
   const handleCopy = (e: React.MouseEvent) => {
     e.preventDefault();
     if (comparisonResult) {
-      // Tạo phiên bản plain text không có thẻ HTML
-      const plainText = `Bên trái: ${leftInput}\nBên phải: ${rightInput}`;
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = comparisonResult;
+      const plainText = tempDiv.textContent || tempDiv.innerText || '';
       navigator.clipboard.writeText(plainText);
-      toast.success('Đã sao chép vào clipboard');
+      toast.success(t('json_compare.copied_to_clipboard'));
     }
   };
 
@@ -352,14 +400,176 @@ export default function JsonCompare() {
   };
 
   // Tạo chuỗi HTML từ mảng các key
-  const renderKeyList = (keys: string[]) => {
+  const renderKeyList = (keys: string[], isLeftMissing: boolean) => {
     if (keys.length === 0) return "<div class='text-gray-400'>Không có key bị thiếu</div>";
     
-    return keys.map(key => 
-      `<div class="mb-1 px-2 py-1 bg-gray-500/10 rounded">
+    return keys.map(key => {
+      // For keys missing on the left (isLeftMissing=true), show a copy button to copy from right
+      // For keys missing on the right (isLeftMissing=false), show a copy button to copy from left
+      const copyDirection = isLeftMissing ? 'right-to-left' : 'left-to-right';
+      const copyTitle = isLeftMissing 
+        ? 'Copy from right to left (missing on left)' 
+        : 'Copy from left to right (missing on right)';
+        
+      return `<div class="mb-1 px-2 py-1 bg-gray-500/10 rounded flex items-center justify-between group">
         <span class="text-yellow-300">${key}</span>
-      </div>`
-    ).join('');
+        <span class="copy-key-btn opacity-0 group-hover:opacity-100 cursor-pointer" 
+              data-key="${key}" 
+              data-direction="${copyDirection}"
+              title="${copyTitle}">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy text-blue-400 hover:text-blue-300">
+            <rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect>
+            <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path>
+          </svg>
+        </span>
+      </div>`;
+    }).join('');
+  };
+
+  // Helper function to get nested value by path
+  const getValueByPath = (obj: any, path: string) => {
+    // First, check if the exact key exists in the object (for keys with dots)
+    if (path in obj) {
+      return obj[path];
+    }
+    
+    // If not a direct key, treat as a nested path
+    // Handle array indexing in paths like "items[0].name" or "items.0.name"
+    const normalizedPath = path.replace(/\[(\d+)\]/g, '.$1');
+    const parts = normalizedPath.split('.');
+    
+    let current = obj;
+    
+    for (let i = 0; i < parts.length; i++) {
+      const part = parts[i];
+      if (part === '') continue; // Skip empty parts from leading/double dots
+      
+      if (current === undefined || current === null) {
+        return undefined;
+      }
+      
+      // Convert to number if it's a digit (array index)
+      const index = !isNaN(Number(part)) ? Number(part) : part;
+      current = current[index];
+    }
+    
+    return current;
+  };
+
+  // Improved copy function with better key handling
+  const copyKeyValue = (key: string, isLeftToRight: boolean) => {
+    try {
+      const leftObj = JSON.parse(leftInput);
+      const rightObj = JSON.parse(rightInput);
+      
+      console.log('Copy request:', { key, isLeftToRight });
+      
+      // The key name for output could be the entire key if it's a direct property with dots
+      // or just the last part of a nested path
+      let keyName = key;
+      
+      // If it looks like a nested path (has dots and those parts represent actual nesting),
+      // extract just the last part
+      if (key.includes('.')) {
+        // Check if it's a direct property first
+        const sourceObj = isLeftToRight ? leftObj : rightObj;
+        const isDirect = key in sourceObj;
+        
+        if (!isDirect) {
+          // It's likely a nested path, so extract the last part
+          keyName = key.split('.').pop()?.replace(/\[\d+\]/g, '') || key;
+        }
+      }
+      
+      console.log('Using key name for output:', keyName);
+      
+      // If there are nested paths with array indices, handle them properly
+      let value;
+      
+      // If missing on right, copy from left; if missing on left, copy from right
+      if (isLeftToRight) {
+        console.log('Looking up value in leftObj');
+        value = getValueByPath(leftObj, key);
+      } else {
+        console.log('Looking up value in rightObj');
+        value = getValueByPath(rightObj, key);
+      }
+      
+      console.log('Found value:', value);
+      
+      if (value === undefined) {
+        toast.error('Không tìm thấy giá trị cho key này');
+        return;
+      }
+      
+      // Format the value for copying
+      let formatted;
+      if (typeof value === 'object' && value !== null) {
+        formatted = JSON.stringify(value, null, 2);
+      } else {
+        formatted = JSON.stringify(value);
+      }
+      
+      const result = `"${keyName}": ${formatted}`;
+      console.log('Formatted result:', result);
+      
+      navigator.clipboard.writeText(result);
+      toast.success('Đã sao chép vào clipboard');
+    } catch (err) {
+      console.error('Copy error:', err);
+      toast.error('Lỗi khi sao chép: ' + (err as Error).message);
+    }
+  };
+
+  // Copy all missing keys at once in JSON format
+  const copyAllMissingKeys = (isLeftMissing: boolean) => {
+    try {
+      const leftObj = JSON.parse(leftInput);
+      const rightObj = JSON.parse(rightInput);
+      
+      // Get the list of keys to copy
+      const keysToCopy = isLeftMissing ? missingInLeftKeys : missingInRightKeys;
+      
+      if (keysToCopy.length === 0) {
+        toast.info('Không có key nào để sao chép');
+        return;
+      }
+      
+      // The source object depends on which keys we're copying
+      // If keys missing on left, copy from right; if keys missing on right, copy from left
+      const sourceObj = isLeftMissing ? rightObj : leftObj;
+      
+      // Build a JSON object with all the missing keys and their values
+      const result: Record<string, any> = {};
+      
+      for (const key of keysToCopy) {
+        // Get value from source object
+        const value = getValueByPath(sourceObj, key);
+        
+        if (value !== undefined) {
+          // Extract key name - for direct properties with dots, use the whole key
+          // For nested paths, just use the last part
+          let keyName = key;
+          if (!(key in sourceObj) && key.includes('.')) {
+            keyName = key.split('.').pop() || key;
+          }
+          
+          // Add to result
+          result[keyName] = value;
+        }
+      }
+      
+      // Format the JSON string nicely
+      const jsonString = JSON.stringify(result, null, 2);
+      
+      console.log('Copying all keys:', jsonString);
+      
+      navigator.clipboard.writeText(jsonString);
+      toast.success(`Đã sao chép ${Object.keys(result).length} key vào clipboard`);
+    } catch (err) {
+      console.error('Copy all error:', err);
+      toast.error('Lỗi khi sao chép: ' + (err as Error).message);
+    }
   };
 
   return (
@@ -367,33 +577,33 @@ export default function JsonCompare() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
           <CardHeader>
-            <CardTitle>JSON bên trái</CardTitle>
+            <CardTitle>{t('json_compare.left_json')}</CardTitle>
           </CardHeader>
           <CardContent>
+            {leftError && <div className="text-red-500 mb-2">{leftError}</div>}
             <Textarea
               ref={leftTextareaRef}
               value={leftInput}
               onChange={(e) => setLeftInput(e.target.value)}
-              placeholder="Nhập JSON thứ nhất..."
-              className="min-h-[200px] font-mono resize-none"
+              placeholder={t('json_compare.enter_left_json')}
+              className="min-h-[300px] font-mono resize-none"
             />
-            {leftError && <div className="mt-2 text-red-500">{leftError}</div>}
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>JSON bên phải</CardTitle>
+            <CardTitle>{t('json_compare.right_json')}</CardTitle>
           </CardHeader>
           <CardContent>
+            {rightError && <div className="text-red-500 mb-2">{rightError}</div>}
             <Textarea
               ref={rightTextareaRef}
               value={rightInput}
               onChange={(e) => setRightInput(e.target.value)}
-              placeholder="Nhập JSON thứ hai..."
-              className="min-h-[200px] font-mono resize-none"
+              placeholder={t('json_compare.enter_right_json')}
+              className="min-h-[300px] font-mono resize-none"
             />
-            {rightError && <div className="mt-2 text-red-500">{rightError}</div>}
           </CardContent>
         </Card>
       </div>
@@ -448,13 +658,24 @@ export default function JsonCompare() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Keys thiếu ở bên trái</CardTitle>
+            {missingInLeftKeys.length > 0 && (
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="text-blue-500 border-blue-500"
+                onClick={() => copyAllMissingKeys(true)}
+                title="Sao chép tất cả thành JSON"
+              >
+                Copy tất cả
+              </Button>
+            )}
           </CardHeader>
           <CardContent>
             <div className="bg-muted p-4 rounded-md font-mono overflow-auto max-h-[300px] text-sm">
               {missingInLeftKeys.length > 0 ? (
-                <div dangerouslySetInnerHTML={{ __html: renderKeyList(missingInLeftKeys) }} />
+                <div dangerouslySetInnerHTML={{ __html: renderKeyList(missingInLeftKeys, true) }} />
               ) : (
                 <div className="text-gray-400">Không có key nào bị thiếu ở bên trái</div>
               )}
@@ -463,13 +684,24 @@ export default function JsonCompare() {
         </Card>
 
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Keys thiếu ở bên phải</CardTitle>
+            {missingInRightKeys.length > 0 && (
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="text-blue-500 border-blue-500"
+                onClick={() => copyAllMissingKeys(false)}
+                title="Sao chép tất cả thành JSON"
+              >
+                Copy tất cả
+              </Button>
+            )}
           </CardHeader>
           <CardContent>
             <div className="bg-muted p-4 rounded-md font-mono overflow-auto max-h-[300px] text-sm">
               {missingInRightKeys.length > 0 ? (
-                <div dangerouslySetInnerHTML={{ __html: renderKeyList(missingInRightKeys) }} />
+                <div dangerouslySetInnerHTML={{ __html: renderKeyList(missingInRightKeys, false) }} />
               ) : (
                 <div className="text-gray-400">Không có key nào bị thiếu ở bên phải</div>
               )}

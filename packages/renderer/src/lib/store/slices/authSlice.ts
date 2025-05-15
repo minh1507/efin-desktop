@@ -12,9 +12,16 @@ interface AuthState {
   error: string | null;
 }
 
+// Giá trị mặc định để auto login trong development
+const defaultUser = {
+  username: 'testuser',
+  accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IlRlc3QgVXNlciIsImlhdCI6MTUxNjIzOTAyMiwiZXhwIjoxODkwMTM5MDIyfQ.XD-rl5ri9Xd4-GSjjFJ_eYwx32GFJ2C4B1qe5tMXd-Q'
+};
+
 const initialState: AuthState = {
-  user: null,
-  status: 'idle',
+  // Auto login cho phát triển
+  user: defaultUser,
+  status: 'succeeded',
   error: null
 };
 
@@ -51,10 +58,7 @@ const authSlice = createSlice({
     },
     mockLogin: (state) => {
       state.status = 'succeeded';
-      state.user = {
-        username: 'testuser',
-        accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IlRlc3QgVXNlciIsImlhdCI6MTUxNjIzOTAyMiwiZXhwIjoxODkwMTM5MDIyfQ.XD-rl5ri9Xd4-GSjjFJ_eYwx32GFJ2C4B1qe5tMXd-Q'
-      };
+      state.user = defaultUser;
       state.error = null;
     }
   },

@@ -37,20 +37,21 @@
   cursor: not-allowed;
 }
 
+/* Thiết lập style cho thanh cuộn */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #1e1e2e; 
+  background: #1e1e2e;
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(45deg, #6366f1, #9333ea); 
+  background: linear-gradient(45deg, #6366f1, #9333ea);
   border-radius: 10px;
-  border: 2px solid #1e1e2e; 
+  border: 2px solid #1e1e2e;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -63,13 +64,321 @@
 
 /* App CSS */
 
+/* Thiết lập layout chung */
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* CSS variables for consistent sizing */
+:root {
+  --sidebar-width: 280px;
+  --primary: #3461FF;
+  --primary-foreground: white;
+  --secondary: #2950E3;
+  --background: #f8f9fa;
+  --foreground: #111827;
+  --card: white;
+  --card-foreground: #111827;
+  --border: #e5e7eb;
+  --input: #e5e7eb;
+  --ring: #3461FF;
+  --muted: #f3f4f6;
+  --muted-foreground: #6b7280;
+}
+
+.dark {
+  --primary: #3461FF;
+  --primary-foreground: white;
+  --secondary: #2950E3;
+  --background: #1a1a2e;
+  --foreground: #e5e7eb;
+  --card: #1e1e32;
+  --card-foreground: #e5e7eb;
+  --border: #2e2e46;
+  --input: #2e2e46;
+  --ring: #3461FF;
+  --muted: #191927;
+  --muted-foreground: #9ca3af;
+}
+
+.light {
+  --primary: #3461FF;
+  --primary-foreground: white;
+  --secondary: #2950E3;
+  --background: #f8f9fa;
+  --foreground: #111827;
+  --card: white;
+  --card-foreground: #111827;
+  --border: #e5e7eb;
+  --input: #e5e7eb;
+  --ring: #3461FF;
+  --muted: #f3f4f6;
+  --muted-foreground: #6b7280;
+}
+
+.blue {
+  --primary: #0369a1;
+  --primary-foreground: white;
+  --secondary: #0284c7; 
+  --background: #0c4a6e;
+  --foreground: #e5e7eb;
+  --card: #075985;
+  --card-foreground: #e5e7eb;
+  --border: #0ea5e9;
+  --input: #075985;
+  --ring: #38bdf8;
+  --muted: #0c4a6e;
+  --muted-foreground: #bae6fd;
+}
+
+.green {
+  --primary: #166534;
+  --primary-foreground: white;
+  --secondary: #15803d;
+  --background: #064e3b;
+  --foreground: #e5e7eb;
+  --card: #065f46;
+  --card-foreground: #e5e7eb;
+  --border: #10b981;
+  --input: #065f46;
+  --ring: #34d399;
+  --muted: #064e3b;
+  --muted-foreground: #a7f3d0;
+}
+
+/* ======================
+   BREADCRUMB STYLES
+====================== */
+[aria-label="Trang chủ"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+}
+
+[aria-label="Trang chủ"] svg {
+  color: var(--muted-foreground);
+  transition: color 0.2s ease;
+}
+
+[aria-label="Trang chủ"]:hover svg {
+  color: var(--primary);
+}
+
+/* Style cho folder trong breadcrumb */
+.text-muted-foreground {
+  opacity: 0.7;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+/* ======================
+   LOGIN PAGE STYLES
+====================== */
+
+/* Animation login background */
+@keyframes gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Glass card cho login */
+.glass-card {
+  backdrop-filter: blur(10px) !important;
+  background-color: rgba(26, 34, 52, 0.7) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  max-width: 400px !important; /* Giới hạn chiều rộng của card */
+  width: 100% !important;
+  margin: 0 auto !important;
+}
+
+/* Login button effects */
+.login-button {
+  position: relative !important;
+  overflow: hidden !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: 0 4px 12px rgba(52, 97, 255, 0.35) !important;
+  background: linear-gradient(to right, #3461FF, #2950E3) !important;
+  color: white !important;
+  font-weight: 500 !important;
+  border: none !important;
+}
+
+.login-button:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(52, 97, 255, 0.5) !important;
+  background: linear-gradient(to right, #2950E3, #1E37A6) !important;
+}
+
+.login-button:active {
+  transform: translateY(0) !important;
+  box-shadow: 0 2px 6px rgba(52, 97, 255, 0.3) !important;
+}
+
+.login-button::after {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: -100% !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  ) !important;
+  transition: 0.8s !important;
+}
+
+.login-button:hover::after {
+  left: 100% !important;
+}
+
+/* ======================
+   SIDEBAR STYLES
+====================== */
+
+/* Định nghĩa chiều cao sidebar */
+[data-slot="sidebar-inner"] {
+  height: 100vh !important;
+  overflow-y: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  position: fixed !important; /* Make sidebar fixed */
+  width: var(--sidebar-width, 280px) !important; /* Use CSS variable for width */
+}
+
+/* Fix cho sidebar height */
+.sidebar-content-wrapper {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  overflow: hidden !important;
+}
+
+/* Thiết lập flex và auto cho phần content trong sidebar */
+.sidebar-content-wrapper > div:first-child {
+  flex: 1 !important;
+  overflow-y: auto !important;
+  padding-bottom: 10px !important; /* Ensure space before user profile */
+}
+
+/* Giữ phần user-profile-section hiển thị ở cuối */
+.user-profile-section {
+  position: sticky !important;
+  bottom: 0 !important;
+  background-color: var(--card) !important;
+  border-top: 1px solid var(--border) !important;
+  z-index: 20 !important;
+  padding: 10px !important;
+  box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Đảm bảo Sidebar có chiều cao đầy đủ */
+.app-sidebar {
+  height: 100vh !important;
+  position: sticky !important;
+  top: 0 !important;
+  left: 0 !important;
+  z-index: 40 !important;
+}
+
+/* ======================
+   LAYOUT STYLES
+====================== */
+
+/* Thiết lập header cố định */
 .app-header {
-  height: 60px; /* Chiều cao cố định để đảm bảo SearchDialog được đặt đúng vị trí */
+  height: 54px;
   border-bottom: 1px solid var(--border);
   background-color: var(--background);
   position: sticky;
   top: 0;
-  z-index: 10;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  width: 100%;
 }
 
-/* Các style khác nếu cần */
+/* Style cho phần main */
+.app-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  width: 100%;
+  overflow-y: auto; /* Enable scrolling in main content */
+  height: calc(100vh - 94px); /* Height minus header and footer */
+}
+
+/* Style cho footer - đặt trong main content */
+.app-footer {
+  height: 40px;
+  line-height: 40px; /* Căn giữa theo chiều dọc */
+  border-top: 1px solid var(--border);
+  background-color: var(--background);
+  width: 100%;
+  text-align: center;
+  font-size: 0.85rem;
+}
+
+/* ======================
+   TEXT WRAPPING STYLES 
+====================== */
+
+/* Đảm bảo các văn bản dài và json tự động xuống dòng */
+pre, code, .json, [class*="json"], [role="json"] {
+  white-space: pre-wrap !important;
+  word-wrap: break-word !important;
+  word-break: break-word !important;
+  overflow-wrap: break-word !important;
+  max-width: 100% !important;
+}
+
+/* Áp dụng cho tất cả các vùng hiển thị có thể chứa JSON */
+.code-block, 
+.data-display, 
+.response-container,
+.panel-content,
+.card-content,
+.data-view,
+[class*="CodeMirror"],
+[class*="editor"],
+[class*="content"] {
+  white-space: pre-wrap !important;
+  word-wrap: break-word !important;
+  word-break: break-word !important;
+  overflow-wrap: break-word !important;
+  max-width: 100% !important;
+}
+
+/* Mặc định cho tất cả các phần tử có thể chứa text dài */
+div, p, span, td, th {
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
+/* ======================
+   RESPONSIVE STYLES
+====================== */
+
+/* Responsive behavior for mobile devices */
+@media (max-width: 768px) {
+  .app-header .container {
+    justify-content: space-between;
+  }
+  
+  .user-info {
+    display: none;
+  }
+}

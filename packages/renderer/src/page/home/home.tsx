@@ -1,18 +1,22 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { ArrowRight, FileJson, Settings, BarChart, Zap, Code, Clock, GitCompare } from 'lucide-react';
+import { useFeatureTracking } from '@/hooks/useFeatureTracking';
+import { useLanguage } from '@/components/language-provider';
 
 export default function Home() {
+  // Track usage of the home page
+  useFeatureTracking('home');
+  const { t } = useLanguage();
+
   return (
     <div className="space-y-8">
       {/* Hero section */}
       <section className="space-y-4">
         <div className="flex flex-col">
-          <Badge variant="outline" className="w-fit mb-4">Dashboard</Badge>
-          <h1 className="text-3xl font-bold tracking-tight">Chào mừng trở lại!</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t('home.title')}</h1>
           <p className="text-muted-foreground">
-            Khám phá những công cụ mạnh mẽ và tiện ích để giúp bạn làm việc hiệu quả hơn.
+            {t('home.subtitle')}
           </p>
         </div>
       </section>
@@ -20,9 +24,9 @@ export default function Home() {
       {/* Featured tools */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold">Công cụ phổ biến</h2>
+          <h2 className="text-xl font-semibold">{t('home.popular_tools')}</h2>
           <Button variant="ghost" size="sm" className="gap-1">
-            Xem tất cả <ArrowRight className="h-4 w-4" />
+            {t('home.view_all')} <ArrowRight className="h-4 w-4" />
           </Button>
         </div>
 
@@ -34,15 +38,15 @@ export default function Home() {
               </div>
               <CardTitle>JSON Formatter</CardTitle>
               <CardDescription>
-                Format và kiểm tra cú pháp JSON
+                {t('home.json_formatter_description')}
               </CardDescription>
             </CardHeader>
             <CardContent className="pb-2 text-sm text-muted-foreground">
-              Định dạng, tìm lỗi và làm đẹp code JSON một cách nhanh chóng
+              {t('home.json_formatter_content')}
             </CardContent>
             <CardFooter>
               <Button variant="ghost" size="sm" asChild>
-                <a href="#/format/json">Mở công cụ</a>
+                <a href="#/format/json">{t('home.open_tool')}</a>
               </Button>
             </CardFooter>
           </Card>
@@ -54,15 +58,15 @@ export default function Home() {
               </div>
               <CardTitle>JSON Comparison</CardTitle>
               <CardDescription>
-                So sánh hai đối tượng JSON
+                {t('home.json_comparison_description')}
               </CardDescription>
             </CardHeader>
             <CardContent className="pb-2 text-sm text-muted-foreground">
-              Dễ dàng so sánh và tìm sự khác biệt giữa hai đối tượng JSON
+              {t('home.json_comparison_content')}
             </CardContent>
             <CardFooter>
               <Button variant="ghost" size="sm" asChild>
-                <a href="#/format/compare-json">Mở công cụ</a>
+                <a href="#/format/compare-json">{t('home.open_tool')}</a>
               </Button>
             </CardFooter>
           </Card>
@@ -72,16 +76,16 @@ export default function Home() {
               <div className="w-12 h-12 rounded-lg bg-secondary/10 flex items-center justify-center mb-2">
                 <Settings className="text-secondary h-6 w-6" />
               </div>
-              <CardTitle>Cài đặt</CardTitle>
+              <CardTitle>{t('app.settings')}</CardTitle>
               <CardDescription>
-                Tùy chỉnh ứng dụng
+                {t('home.settings_description')}
               </CardDescription>
             </CardHeader>
             <CardContent className="pb-2 text-sm text-muted-foreground">
-              Thay đổi giao diện, bảo mật và các tùy chọn khác
+              {t('home.settings_content')}
             </CardContent>
             <CardFooter>
-              <Button variant="ghost" size="sm">Mở cài đặt</Button>
+              <Button variant="ghost" size="sm">{t('home.open_settings')}</Button>
             </CardFooter>
           </Card>
 
@@ -90,16 +94,16 @@ export default function Home() {
               <div className="w-12 h-12 rounded-lg bg-destructive/10 flex items-center justify-center mb-2">
                 <BarChart className="text-destructive h-6 w-6" />
               </div>
-              <CardTitle>Thống kê</CardTitle>
+              <CardTitle>{t('sidebar.statistics')}</CardTitle>
               <CardDescription>
-                Xem thống kê sử dụng
+                {t('home.statistics_description')}
               </CardDescription>
             </CardHeader>
             <CardContent className="pb-2 text-sm text-muted-foreground">
-              Theo dõi thời gian và tần suất sử dụng các công cụ
+              {t('home.statistics_content')}
             </CardContent>
             <CardFooter>
-              <Button variant="ghost" size="sm">Xem thống kê</Button>
+              <Button variant="ghost" size="sm">{t('home.view_statistics')}</Button>
             </CardFooter>
           </Card>
         </div>
@@ -107,21 +111,21 @@ export default function Home() {
 
       {/* Recent activities */}
       <section className="space-y-4">
-        <h2 className="text-xl font-semibold">Hoạt động gần đây</h2>
-        
+        <h2 className="text-xl font-semibold">{t('home.recent_activities')}</h2>
+
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle>Lịch sử hoạt động</CardTitle>
+            <CardTitle>{t('home.activity_history')}</CardTitle>
             <CardDescription>
-              Các hoạt động được thực hiện gần đây
+              {t('home.recent_activities_description')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               {[
-                { icon: FileJson, title: 'JSON Formatter', time: '10 phút trước', color: 'text-primary' },
-                { icon: Code, title: 'Format code', time: '2 giờ trước', color: 'text-green-500' },
-                { icon: Clock, title: 'Thống kê sử dụng', time: '1 ngày trước', color: 'text-orange-500' },
+                { icon: FileJson, title: 'JSON Formatter', time: t('home.time_10min_ago'), color: 'text-primary' },
+                { icon: Code, title: t('home.format_code'), time: t('home.time_2hours_ago'), color: 'text-green-500' },
+                { icon: Clock, title: t('home.usage_statistics'), time: t('home.time_1day_ago'), color: 'text-orange-500' },
               ].map((item, index) => (
                 <div key={index} className="flex items-start gap-3">
                   <div className={`p-2 rounded-full bg-muted ${item.color}`}>
@@ -132,7 +136,7 @@ export default function Home() {
                       <p className="font-medium">{item.title}</p>
                       <p className="text-sm text-muted-foreground">{item.time}</p>
                     </div>
-                    <p className="text-sm text-muted-foreground">Bạn đã sử dụng {item.title.toLowerCase()}</p>
+                    <p className="text-sm text-muted-foreground">{t('home.you_used')} {item.title.toLowerCase()}</p>
                   </div>
                 </div>
               ))}
@@ -143,18 +147,18 @@ export default function Home() {
 
       {/* Features */}
       <section className="space-y-4">
-        <h2 className="text-xl font-semibold">Tính năng nổi bật</h2>
-        
+        <h2 className="text-xl font-semibold">{t('home.featured_features')}</h2>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card className="hover:shadow-md transition-shadow">
             <CardHeader className="pb-2">
               <div className="flex items-center gap-2">
                 <Zap className="text-yellow-500 h-5 w-5" />
-                <CardTitle className="text-base">Hiệu suất cao</CardTitle>
+                <CardTitle className="text-base">{t('home.high_performance')}</CardTitle>
               </div>
             </CardHeader>
             <CardContent className="text-sm text-muted-foreground">
-              Ứng dụng được tối ưu hóa để chạy nhanh và mượt mà ngay cả với dữ liệu lớn
+              {t('home.high_performance_description')}
             </CardContent>
           </Card>
 
@@ -162,11 +166,11 @@ export default function Home() {
             <CardHeader className="pb-2">
               <div className="flex items-center gap-2">
                 <Clock className="text-blue-500 h-5 w-5" />
-                <CardTitle className="text-base">Lưu lịch sử</CardTitle>
+                <CardTitle className="text-base">{t('home.save_history')}</CardTitle>
               </div>
             </CardHeader>
             <CardContent className="text-sm text-muted-foreground">
-              Tự động lưu lịch sử các thao tác để dễ dàng truy cập lại sau này
+              {t('home.save_history_description')}
             </CardContent>
           </Card>
 
@@ -174,11 +178,11 @@ export default function Home() {
             <CardHeader className="pb-2">
               <div className="flex items-center gap-2">
                 <Code className="text-green-500 h-5 w-5" />
-                <CardTitle className="text-base">Hỗ trợ nhiều định dạng</CardTitle>
+                <CardTitle className="text-base">{t('home.multiple_formats')}</CardTitle>
               </div>
             </CardHeader>
             <CardContent className="text-sm text-muted-foreground">
-              Hỗ trợ nhiều định dạng dữ liệu phổ biến như JSON, XML, CSV và nhiều hơn nữa
+              {t('home.multiple_formats_description')}
             </CardContent>
           </Card>
 
@@ -186,11 +190,11 @@ export default function Home() {
             <CardHeader className="pb-2">
               <div className="flex items-center gap-2">
                 <Settings className="text-purple-500 h-5 w-5" />
-                <CardTitle className="text-base">Tùy biến cao</CardTitle>
+                <CardTitle className="text-base">{t('home.high_customization')}</CardTitle>
               </div>
             </CardHeader>
             <CardContent className="text-sm text-muted-foreground">
-              Dễ dàng tùy chỉnh giao diện và chức năng theo nhu cầu cá nhân
+              {t('home.high_customization_description')}
             </CardContent>
           </Card>
         </div>

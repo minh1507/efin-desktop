@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import { getSetting, saveSetting } from "@/services/database";
 
-type Theme = "dark" | "light" | "system";
+type Theme = "dark" | "light" | "blue" | "green";
 
 type ThemeProviderProps = {
   children: React.ReactNode;
@@ -14,7 +15,7 @@ type ThemeProviderState = {
 };
 
 const initialState: ThemeProviderState = {
-  theme: "system",
+  theme: "dark",
   setTheme: () => null,
 };
 
@@ -22,29 +23,47 @@ const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 
 export function ThemeProvider({
   children,
-  defaultTheme = "system",
-  storageKey = "vite-ui-theme",
+  defaultTheme = "dark",
+  storageKey = "app-theme",
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(
-    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
-  );
+  const [theme, setTheme] = useState<Theme>(defaultTheme);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // Load theme from database when component mounts
+  useEffect(() => {
+    async function loadTheme() {
+      try {
+        const savedTheme = await getSetting(storageKey);
+        if (savedTheme && (savedTheme === "dark" || savedTheme === "light" || savedTheme === "blue" || savedTheme === "green")) {
+          setTheme(savedTheme as Theme);
+        }
+        setIsLoaded(true);
+      } catch (error) {
+        console.error("Failed to load theme from database:", error);
+        setIsLoaded(true);
+      }
+    }
+    loadTheme();
+  }, [storageKey]);
 
   useEffect(() => {
+    if (!isLoaded) return;
+    
     const root = window.document.documentElement;
-    root.classList.remove("light", "dark");
-    if (theme === "system") {
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-      root.classList.add(systemTheme);
-      return;
-    }
+    root.classList.remove("dark", "light", "blue", "green");
     root.classList.add(theme);
-  }, [theme]);
+    
+    // Store theme as data attribute for CSS access
+    root.setAttribute("data-theme", theme);
+  }, [theme, isLoaded]);
 
   const value = {
     theme,
-    setTheme: (theme: Theme) => {
-      localStorage.setItem(storageKey, theme);
-      setTheme(theme);
+    setTheme: (newTheme: Theme) => {
+      saveSetting(storageKey, newTheme).catch(error => {
+        console.error("Failed to save theme to database:", error);
+      });
+      setTheme(newTheme);
     },
   };
 

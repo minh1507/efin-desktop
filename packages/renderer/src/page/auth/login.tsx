@@ -9,68 +9,6 @@ import { loginUser, mockLogin } from '@/lib/store/slices/authSlice';
 import { THEME } from '@/lib/theme';
 import { APP_NAME } from '@/lib/constants';
 
-// Định nghĩa keyframes và style cho component
-const loginStyles = `
-  @keyframes gradient {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
-  
-  @keyframes pulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(52, 97, 255, 0.4); }
-    50% { box-shadow: 0 0 0 10px rgba(52, 97, 255, 0); }
-  }
-  
-  .glass-card {
-    backdrop-filter: blur(10px);
-    background-color: rgba(26, 34, 52, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-  
-  .login-button {
-    position: relative;
-    overflow: hidden;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 12px rgba(52, 97, 255, 0.35);
-    background: linear-gradient(to right, #3461FF, #2950E3);
-    color: white;
-    font-weight: 500;
-    border: none;
-  }
-  
-  .login-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(52, 97, 255, 0.5);
-    background: linear-gradient(to right, #2950E3, #1E37A6);
-  }
-  
-  .login-button:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 6px rgba(52, 97, 255, 0.3);
-  }
-  
-  .login-button::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgba(255, 255, 255, 0.2),
-      transparent
-    );
-    transition: 0.8s;
-  }
-  
-  .login-button:hover::after {
-    left: 100%;
-  }
-`;
-
 const Login = () => {
   const dispatch = useAppDispatch();
   const { status, error } = useAppSelector(state => state.auth);
@@ -100,15 +38,13 @@ const Login = () => {
 
   return (
     <div 
-      className="fixed inset-0 flex items-center justify-center"
+      className="fixed inset-0 flex items-center justify-center p-4"
       style={{ 
         background: THEME.gradient.loginBackground,
         backgroundSize: '400% 400%',
         animation: 'gradient 15s ease infinite'
       }}
     >
-      <style dangerouslySetInnerHTML={{ __html: loginStyles }} />
-
       <div className="absolute inset-0 opacity-20">
         <div className="absolute w-64 h-64 rounded-full bg-primary-500 top-1/4 -left-12 blur-3xl"></div>
         <div className="absolute w-96 h-96 rounded-full bg-secondary-500 bottom-1/4 -right-20 blur-3xl"></div>
