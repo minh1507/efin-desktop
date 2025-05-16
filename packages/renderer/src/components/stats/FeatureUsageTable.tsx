@@ -41,6 +41,8 @@ const FeatureUsageTable: React.FC<FeatureUsageTableProps> = ({ data }) => {
       'json_compare': 'So sánh JSON',
       'home': 'Trang chủ',
       'statistics': 'Thống kê',
+      'settings': 'Cài đặt',
+      'ai': 'AI Chat',
       // Thêm các tính năng khác ở đây
     };
     
@@ -50,7 +52,7 @@ const FeatureUsageTable: React.FC<FeatureUsageTableProps> = ({ data }) => {
   // Create a sorted copy of the data array
   const sortedData = data && Array.isArray(data) 
     ? [...data]
-        .filter(item => item.feature !== 'statistics') // Filter out statistics page
+        .filter(item => item.feature !== 'statistics' && item.feature !== 'settings') // Filter out statistics and settings pages
         .sort((a, b) => b.timeSpent - a.timeSpent) 
     : [];
   

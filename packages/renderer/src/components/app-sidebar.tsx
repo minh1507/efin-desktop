@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { LogOut, ChevronDown, ChevronRight, FileJson, Settings, LayoutDashboard, User, Shield, GitCompare, BarChart } from 'lucide-react';
+import { LogOut, ChevronDown, ChevronRight, FileJson, Settings, LayoutDashboard, User, Shield, GitCompare, BarChart, Bot, Server } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
@@ -66,6 +66,14 @@ export function AppSidebar({ handleLogout }: AppSidebarProps) {
       icon: BarChart,
       children: [],
     },
+    {
+      titleKey: 'sidebar.ai',
+      icon: Bot,
+      children: [
+        { titleKey: 'sidebar.ai_chat', url: '/ai/chat', icon: Bot, children: [] },
+        { titleKey: 'ai.model_management', url: '/ai/models', icon: Server, children: [] },
+      ],
+    },
   ];
   
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({
@@ -80,6 +88,10 @@ export function AppSidebar({ handleLogout }: AppSidebarProps) {
     
     if (location.pathname.startsWith('/format') && !openMenus[t('sidebar.formatting')]) {
       updatedMenus[t('sidebar.formatting')] = true;
+    }
+    
+    if (location.pathname.startsWith('/ai') && !openMenus[t('sidebar.ai')]) {
+      updatedMenus[t('sidebar.ai')] = true;
     }
     
     setOpenMenus(updatedMenus);

@@ -45,6 +45,8 @@ class FeatureUsageChart extends React.Component<FeatureUsageChartProps> {
       'json_compare': 'So sánh JSON',
       'home': 'Trang chủ',
       'statistics': 'Thống kê',
+      'settings': 'Cài đặt',
+      'ai': 'AI Chat',
       // Thêm các tính năng khác ở đây
     };
     
@@ -54,9 +56,9 @@ class FeatureUsageChart extends React.Component<FeatureUsageChartProps> {
   // Chuẩn bị dữ liệu cho biểu đồ
   prepareChartData = () => {
     const { data } = this.props;
-    // Ensure data is valid and filter out statistics page
+    // Ensure data is valid and filter out statistics and settings pages
     const validData = data && Array.isArray(data) 
-      ? data.filter(item => item.feature !== 'statistics')
+      ? data.filter(item => item.feature !== 'statistics' && item.feature !== 'settings')
       : [];
     
     if (validData.length === 0) {

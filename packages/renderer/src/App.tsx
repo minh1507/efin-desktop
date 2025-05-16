@@ -16,6 +16,7 @@ import { SearchProvider } from './lib/context/search-context';
 import { SearchShortcuts } from './components/search-shortcuts';
 import { AppBreadcrumb } from './components/app-breadcrumb';
 import { LanguageProvider, useLanguage } from './components/language-provider';
+import { AIProvider } from './services/ai/ai-context';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,6 +35,8 @@ const JsonFormatter = lazy(() => import('./page/format/json/json'));
 const JsonCompare = lazy(() => import('./page/format/compare-json/compare-json'));
 const Statistics = lazy(() => import('./page/statistics/statistics'));
 const Settings = lazy(() => import('./page/settings/settings'));
+const GenAI = lazy(() => import('./page/AI/genAI'));
+const ModelConfig = lazy(() => import('./page/AI/ModelConfig'));
 
 // Loading component cho Suspense
 const LoadingScreen = () => (
@@ -181,6 +184,8 @@ const AppLayout = () => {
                   <Route path="/format/compare-json" element={<JsonCompare />} />
                   <Route path="/statistics" element={<Statistics />} />
                   <Route path="/settings" element={<Settings />} />
+                  <Route path="/ai/chat" element={<GenAI />} />
+                  <Route path="/ai/models" element={<ModelConfig />} />
                 </Routes>
               </Suspense>
             </div>
@@ -205,22 +210,24 @@ function App() {
       <LanguageProvider>
         <TooltipProvider>
           <SearchProvider>
-            <Router>
-              <Suspense fallback={<LoadingScreen />}>
-                <Routes>
-                  {/* Routes cho người dùng chưa đăng nhập */}
-                  <Route element={<PublicRoute />}>
-                    <Route path="/login" element={<Login />} />
-                  </Route>
+            <AIProvider>
+              <Router>
+                <Suspense fallback={<LoadingScreen />}>
+                  <Routes>
+                    {/* Routes cho người dùng chưa đăng nhập */}
+                    <Route element={<PublicRoute />}>
+                      <Route path="/login" element={<Login />} />
+                    </Route>
 
-                  {/* Routes cho người dùng đã đăng nhập */}
-                  <Route element={<ProtectedRoute />}>
-                    <Route path="/*" element={<AppLayout />} />
-                  </Route>
-                </Routes>
-              </Suspense>
-              <Toaster />
-            </Router>
+                    {/* Routes cho người dùng đã đăng nhập */}
+                    <Route element={<ProtectedRoute />}>
+                      <Route path="/*" element={<AppLayout />} />
+                    </Route>
+                  </Routes>
+                </Suspense>
+                <Toaster />
+              </Router>
+            </AIProvider>
           </SearchProvider>
         </TooltipProvider>
       </LanguageProvider>
