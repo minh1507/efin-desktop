@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, FileJson, Settings, BarChart, Zap, Code, Clock, GitCompare } from 'lucide-react';
+import { ArrowRight, FileJson, Settings, BarChart, Zap, Code, Clock, GitCompare, MessageSquare, Brain } from 'lucide-react';
 import { useFeatureTracking } from '@/hooks/useFeatureTracking';
 import { useLanguage } from '@/components/language-provider';
 
@@ -73,19 +73,21 @@ export default function Home() {
 
           <Card className="hover:shadow-md transition-shadow">
             <CardHeader className="pb-2">
-              <div className="w-12 h-12 rounded-lg bg-secondary/10 flex items-center justify-center mb-2">
-                <Settings className="text-secondary h-6 w-6" />
+              <div className="w-12 h-12 rounded-lg bg-green-500/10 flex items-center justify-center mb-2">
+                <MessageSquare className="text-green-500 h-6 w-6" />
               </div>
-              <CardTitle>{t('app.settings')}</CardTitle>
+              <CardTitle>VNPAY AI Chat</CardTitle>
               <CardDescription>
-                {t('home.settings_description')}
+                Tương tác với mô hình AI thông minh
               </CardDescription>
             </CardHeader>
             <CardContent className="pb-2 text-sm text-muted-foreground">
-              {t('home.settings_content')}
+              Trò chuyện với AI để nhận thông tin hỗ trợ công việc hàng ngày
             </CardContent>
             <CardFooter>
-              <Button variant="ghost" size="sm">{t('home.open_settings')}</Button>
+              <Button variant="ghost" size="sm" asChild>
+                <a href="#/ai">{t('home.open_tool')}</a>
+              </Button>
             </CardFooter>
           </Card>
 
@@ -103,7 +105,49 @@ export default function Home() {
               {t('home.statistics_content')}
             </CardContent>
             <CardFooter>
-              <Button variant="ghost" size="sm">{t('home.view_statistics')}</Button>
+              <Button variant="ghost" size="sm" asChild>
+                <a href="#/statistics">{t('home.view_statistics')}</a>
+              </Button>
+            </CardFooter>
+          </Card>
+
+          <Card className="hover:shadow-md transition-shadow">
+            <CardHeader className="pb-2">
+              <div className="w-12 h-12 rounded-lg bg-secondary/10 flex items-center justify-center mb-2">
+                <Settings className="text-secondary h-6 w-6" />
+              </div>
+              <CardTitle>{t('app.settings')}</CardTitle>
+              <CardDescription>
+                {t('home.settings_description')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pb-2 text-sm text-muted-foreground">
+              {t('home.settings_content')}
+            </CardContent>
+            <CardFooter>
+              <Button variant="ghost" size="sm" asChild>
+                <a href="#/settings">{t('home.open_settings')}</a>
+              </Button>
+            </CardFooter>
+          </Card>
+
+          <Card className="hover:shadow-md transition-shadow">
+            <CardHeader className="pb-2">
+              <div className="w-12 h-12 rounded-lg bg-purple-500/10 flex items-center justify-center mb-2">
+                <Brain className="text-purple-500 h-6 w-6" />
+              </div>
+              <CardTitle>AI Reasoning</CardTitle>
+              <CardDescription>
+                Mô hình suy luận logic nâng cao
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pb-2 text-sm text-muted-foreground">
+              Giải quyết vấn đề phức tạp với mô hình AI reasoning
+            </CardContent>
+            <CardFooter>
+              <Button variant="ghost" size="sm" asChild>
+                <a href="#/ai">{t('home.open_tool')}</a>
+              </Button>
             </CardFooter>
           </Card>
         </div>
@@ -124,7 +168,8 @@ export default function Home() {
             <div className="space-y-4">
               {[
                 { icon: FileJson, title: 'JSON Formatter', time: t('home.time_10min_ago'), color: 'text-primary' },
-                { icon: Code, title: t('home.format_code'), time: t('home.time_2hours_ago'), color: 'text-green-500' },
+                { icon: MessageSquare, title: 'AI Chat', time: t('home.time_1hour_ago'), color: 'text-green-500' },
+                { icon: Code, title: t('home.format_code'), time: t('home.time_2hours_ago'), color: 'text-blue-500' },
                 { icon: Clock, title: t('home.usage_statistics'), time: t('home.time_1day_ago'), color: 'text-orange-500' },
               ].map((item, index) => (
                 <div key={index} className="flex items-start gap-3">
@@ -189,12 +234,12 @@ export default function Home() {
           <Card className="hover:shadow-md transition-shadow">
             <CardHeader className="pb-2">
               <div className="flex items-center gap-2">
-                <Settings className="text-purple-500 h-5 w-5" />
-                <CardTitle className="text-base">{t('home.high_customization')}</CardTitle>
+                <MessageSquare className="text-purple-500 h-5 w-5" />
+                <CardTitle className="text-base">AI Chat & Reasoning</CardTitle>
               </div>
             </CardHeader>
             <CardContent className="text-sm text-muted-foreground">
-              {t('home.high_customization_description')}
+              Công cụ AI thông minh giúp tương tác, trả lời câu hỏi và giải quyết vấn đề phức tạp
             </CardContent>
           </Card>
         </div>

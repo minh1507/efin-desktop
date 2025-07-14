@@ -55,24 +55,24 @@ const Statistics = () => {
     return data.reduce((sum, item) => sum + item.count, 0);
   };
 
-  // Tính tổng số lượt truy cập vào các tính năng (không bao gồm trang thống kê)
+  // Tính tổng số lượt truy cập vào các tính năng (không bao gồm trang thống kê và trang cài đặt)
   const getTotalFeatureVisits = (data: FeatureUsage[]): number => {
     return data
-      .filter(item => item.feature !== 'statistics')
+      .filter(item => item.feature !== 'statistics' && item.feature !== 'settings')
       .reduce((sum, item) => sum + item.count, 0);
   };
 
-  // Tính tổng thời gian sử dụng (đơn vị phút), không bao gồm trang thống kê
+  // Tính tổng thời gian sử dụng (đơn vị phút), không bao gồm trang thống kê và trang cài đặt
   const getTotalTimeSpent = (data: FeatureUsage[]): number => {
     const totalSeconds = data
-      .filter(item => item.feature !== 'statistics')
+      .filter(item => item.feature !== 'statistics' && item.feature !== 'settings')
       .reduce((sum, item) => sum + item.timeSpent, 0);
     return Math.round(totalSeconds / 60); // Đổi từ giây sang phút
   };
 
-  // Tính số lượng tính năng đã sử dụng, không bao gồm trang thống kê
+  // Tính số lượng tính năng đã sử dụng, không bao gồm trang thống kê và trang cài đặt
   const getFeatureCount = (data: FeatureUsage[]): number => {
-    return data.filter(item => item.feature !== 'statistics').length;
+    return data.filter(item => item.feature !== 'statistics' && item.feature !== 'settings').length;
   };
 
   // Tính tính năng được sử dụng nhiều nhất
@@ -80,7 +80,7 @@ const Statistics = () => {
     if (data.length === 0) return 'Chưa có dữ liệu';
     
     const sorted = [...data]
-      .filter(item => item.feature !== 'statistics')
+      .filter(item => item.feature !== 'statistics' && item.feature !== 'settings')
       .sort((a, b) => b.count - a.count);
     
     if (sorted.length === 0) return 'Chưa có dữ liệu';
@@ -89,7 +89,8 @@ const Statistics = () => {
       'json_formatter': 'JSON Formatter',
       'json_compare': 'So sánh JSON',
       'home': 'Trang chủ',
-      'statistics': 'Thống kê'
+      'statistics': 'Thống kê',
+      'ai': 'AI Chat'
     };
     
     return featureMap[sorted[0].feature] || sorted[0].feature;
@@ -100,7 +101,7 @@ const Statistics = () => {
     if (data.length === 0) return 'Chưa có dữ liệu';
     
     const sorted = [...data]
-      .filter(item => item.feature !== 'statistics')
+      .filter(item => item.feature !== 'statistics' && item.feature !== 'settings')
       .sort((a, b) => b.timeSpent - a.timeSpent);
     
     if (sorted.length === 0) return 'Chưa có dữ liệu';
@@ -109,7 +110,8 @@ const Statistics = () => {
       'json_formatter': 'JSON Formatter',
       'json_compare': 'So sánh JSON',
       'home': 'Trang chủ',
-      'statistics': 'Thống kê'
+      'statistics': 'Thống kê',
+      'ai': 'AI Chat'
     };
     
     return featureMap[sorted[0].feature] || sorted[0].feature;
